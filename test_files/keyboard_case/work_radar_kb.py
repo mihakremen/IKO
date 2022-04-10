@@ -2,6 +2,8 @@ import pygame
 import math
 import random
 import os
+import time
+from threading import Thread
 
 screen_size = (400, 400)
 screen_center = (int(screen_size[0]/2), int(screen_size[1]/2))
@@ -62,13 +64,14 @@ class Meeting_place(pygame.sprite.Sprite):
         self.rect.center = (WIDTH / 2, HEIGHT / 4)
 
     def update(self):
+        meeting_place_timer = 50
         global offset_Meeting
         #global offset_timer
         offset_Meeting += 1
         # offset += (2/(0.5*HEIGHT-0.125*HEIGHT))*(0.5*HEIGHT-self.rect.bottom)
           # изменение скорости в зависимости от координаты. Начальная скорость = 2
         # if offset >= 1:
-        if offset_Meeting == 120:  # #занчение смещения записывается в формате float в переменную offset
+        if offset_Meeting == 120:  # #значение смещения записывается в формате float в переменную offset
             # self.rect.y += round(offset)                                                                 #т.к. спрайт может сдвигаться только на целое значение пикселей,
             print("offset_Meeting", offset_Meeting)
             self.rect.y += 1
@@ -91,7 +94,7 @@ class Rocket(pygame.sprite.Sprite):
             offset_Rocket += 1
             print("offset_Rocket", offset_Rocket)
             if offset_Rocket == 120:
-                # self.rect.y += round(offset)                                                                 #т.к. спрайт может сдвигаться только на целое значение пикселей,
+                # self.rect.y += round(offset)                                    #т.к. спрайт может сдвигаться только на целое значение пикселей,
                 print("offset_Rocket", offset_Rocket)
                 self.rect.y -= 3
                 offset_Rocket = 0
