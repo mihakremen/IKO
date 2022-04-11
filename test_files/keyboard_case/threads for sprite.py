@@ -19,6 +19,7 @@ offset_Meeting = 0
 offset_Rocket = 0
 pusk = 0
 
+
 # COMPAS
 co_width = 14
 line_begin = (screen_center[0], 0)
@@ -30,27 +31,6 @@ LINES_COL = (255, 255, 255)
 FPS = 60
 
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = player_img
-        self.image = pygame.transform.scale(self.image, (round(WIDTH / 6), round(HEIGHT / 6)))
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 8)
-
-    def update(self):
-        global offset_Player
-        # global offset_timer
-        offset_Player += 1
-        # offset += (2/(0.5*HEIGHT-0.125*HEIGHT))*(0.5*HEIGHT-self.rect.bottom)
-        # изменение скорости в зависимости от координаты. Начальная скорость = 2
-        # if offset >= 1:
-        if offset_Player == 120:  # #занчение смещения записывается в формате float в переменную offset
-            # self.rect.y += round(offset)                                                                 #т.к. спрайт может сдвигаться только на целое значение пикселей,
-            print("offset_Player", offset_Player)
-            self.rect.y += 2
-            offset_Player = 0
-
 
 class Meeting_place(pygame.sprite.Sprite):
     def __init__(self):
@@ -61,7 +41,7 @@ class Meeting_place(pygame.sprite.Sprite):
         self.rect.center = (WIDTH / 2, HEIGHT / 4)
 
     def update(self):
-        meeting_place_timer = 50
+        meeting_place_timer = 2
         global offset_Meeting
         # global offset_timer
         #       offset_Meeting += 1
@@ -73,36 +53,13 @@ class Meeting_place(pygame.sprite.Sprite):
         # self.rect.y += round(offset)                                                                 #т.к. спрайт может сдвигаться только на целое значение пикселей,
 
         self.rect.y += 1
-        time.sleep(meeting_place_timer)
+        pygame.time.wait(meeting_place_timer*1000)
         offset_Meeting = 0
         print("offset_Meeting", offset_Meeting)
 
 
 th = Thread(target=Meeting_place, args=())
 th.start()
-
-
-# def pusk(rocket_img, offset_Rocket):
-class Rocket(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = rocket_img
-        self.image = pygame.transform.scale(self.image, (round(WIDTH / 6), round(HEIGHT / 6)))
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 2)
-
-    def update(self):
-        global offset_Rocket
-        global pusk
-
-        if (pusk == 1):  # #значение смещения записывается в формате float в переменную offset
-            offset_Rocket += 1
-            print("offset_Rocket", offset_Rocket)
-            if offset_Rocket == 120:
-                # self.rect.y += round(offset)                                    #т.к. спрайт может сдвигаться только на целое значение пикселей,
-                print("offset_Rocket", offset_Rocket)
-                self.rect.y -= 3
-                offset_Rocket = 0
 
 
 pygame.init()
@@ -117,10 +74,8 @@ meeting_place_img = pygame.image.load(os.path.join(img_folder, 'meeting_place.pn
 rocket_img = pygame.image.load(os.path.join(img_folder, 'rocket.png'))
 
 all_sprites = pygame.sprite.Group()
-player = Player()
 meeting_place = Meeting_place()
-rocket = Rocket()
-all_sprites.add(player, meeting_place, rocket)
+all_sprites.add(meeting_place)
 
 while True:
     for event in pygame.event.get():
