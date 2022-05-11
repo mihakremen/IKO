@@ -1,9 +1,10 @@
+from threading import Thread
+
 import pygame
 import math
 import random
 import os
 import time
-from threading import Thread
 
 screen_size = (400, 400)
 screen_center = (int(screen_size[0] / 2), int(screen_size[1] / 2))
@@ -12,13 +13,13 @@ angle = 0
 ma_angle = 0
 width = 105 * math.pi / 360
 
-WIDTH = 400
-HEIGHT = 400
+WIDTH = screen_size[0]
+HEIGHT = screen_size[1]
+# real_space_width = input_V / 100 * 400
 offset_Player = 0
 offset_Meeting = 0
 offset_Rocket = 0
 pusk = 0
-
 
 # COMPAS
 co_width = 14
@@ -28,38 +29,102 @@ line_end = (screen_center[0], screen_radius * 0.15)
 BACK_COL = (0, 138, 41)
 LINES_COL = (255, 255, 255)
 
-FPS = 60
+FPS = 10
 
+
+class Rocket(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = rocket_img
+        self.image = pygame.transform.scale(self.image, (round(WIDTH / 8), round(HEIGHT / 8)))
+        self.rect = self.image.get_rect()
+        self.image.set_alpha(100)
+        self.rect.center = ((WIDTH / 2) - 20, (HEIGHT / 2) - 20)
+        self.x = (self.rect.center[0])  # добавлено
+        self.y = (self.rect.center[1])  # добавлено
+        self.speedx = 0
+        self.speedy = 0  # добавлено
+
+    def go(self):  # добавлено
+        self.x += self.speedx  # добавлено
+        self.y += self.speedy  # добавлено
+        self.rect.x = float(self.x)  # добавлено
+        self.rect.y = float(self.y)  # добавлено
+
+    def set_speed(self, x, y, speed):  # добавлено
+        xs = x - self.x  # добавлено
+        ys = y - self.y  # добавлено
+        k = speed / math.sqrt(xs * xs + ys * ys)  # добавлено
+        self.speedx = xs * k  # добавлено
+        self.speedy = ys * k  # добавлено
+
+    def get_distance(self, x, y):  # добавлено
+        xs = x - self.x  # добавлено
+        ys = y - self.y  # добавлено
+        return math.sqrt(xs * xs + ys * ys)  # добавлено
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = player_img
+        self.image = pygame.transform.scale(self.image, (int(WIDTH / 8), int(HEIGHT / 8)))
+        self.rect = self.image.get_rect()
+        self.rect.center = (WIDTH / 2, HEIGHT / 8)  # начальные координаты
+        self.x = int(self.rect.center[0])  # добавлено
+        self.y = int(self.rect.center[1])  # добавлено
+        self.speedx = 0
+        self.speedy = 0  # добавлено
+
+    def go(self):  # добавлено
+        self.x += self.speedx  # добавлено
+        self.y += self.speedy  # добавлено
+        self.rect.x = int(self.x)  # добавлено
+        self.rect.y = int(self.y)  # добавлено
+
+    def set_speed(self, x, y, speed):  # добавлено
+        xs = x - self.x  # добавлено
+        ys = y - self.y  # добавлено
+        k = speed / math.sqrt(xs * xs + ys * ys)  # добавлено
+        self.speedx = xs * k  # добавлено
+        self.speedy = ys * k  # добавлено
+
+    def get_distance(self, x, y):  # добавлено
+        xs = x - self.x  # добавлено
+        ys = y - self.y  # добавлено
+        return math.sqrt(xs * xs + ys * ys)  # добавлено
 
 
 class Meeting_place(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
+
         self.image = meeting_place_img
         self.image = pygame.transform.scale(self.image, (round(WIDTH / 6), round(HEIGHT / 6)))
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 4)
+        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.x = (self.rect.center[0])  # добавлено
+        self.y = (self.rect.center[1])  # добавлено
+        self.speedx = 0
+        self.speedy = 0  # добавлено
 
-    def update(self):
-        meeting_place_timer = 2
-        global offset_Meeting
-        # global offset_timer
-        #       offset_Meeting += 1
-        # offset += (2/(0.5*HEIGHT-0.125*HEIGHT))*(0.5*HEIGHT-self.rect.bottom)
-        # изменение скорости в зависимости от координаты. Начальная скорость = 2
-        # if offset >= 1:
-        #       if offset_Meeting == 120:  #значение смещения записывается в формате float в переменную offset
+    def go(self):  # добавлено
+        self.x += self.speedx  # добавлено
+        self.y += self.speedy  # добавлено
+        self.rect.x = int(self.x)  # добавлено
+        self.rect.y = int(self.y)  # добавлено
 
-        # self.rect.y += round(offset)                                                                 #т.к. спрайт может сдвигаться только на целое значение пикселей,
+    def set_speed(self, x, y, speed):  # добавлено
+        xs = x - self.x  # добавлено
+        ys = y - self.y  # добавлено
+        k = speed / math.sqrt(xs * xs + ys * ys)  # добавлено
+        self.speedx = xs * k  # добавлено
+        self.speedy = ys * k  # добавлено
 
-        self.rect.y += 1
-        pygame.time.wait(meeting_place_timer*1000)
-        offset_Meeting = 0
-        print("offset_Meeting", offset_Meeting)
-
-
-th = Thread(target=Meeting_place, args=())
-th.start()
+    def get_distance(self, x, y):  # добавлено
+        xs = x - self.x  # добавлено
+        ys = y - self.y  # добавлено
+        return math.sqrt(xs * xs + ys * ys)  # добавлено
 
 
 pygame.init()
@@ -73,11 +138,20 @@ player_img = pygame.image.load(os.path.join(img_folder, 'aim_1_romb.png'))
 meeting_place_img = pygame.image.load(os.path.join(img_folder, 'meeting_place.png'))
 rocket_img = pygame.image.load(os.path.join(img_folder, 'rocket.png'))
 
-all_sprites = pygame.sprite.Group()
 meeting_place = Meeting_place()
-all_sprites.add(meeting_place)
+# куда лететь, с какой скоростью
 
-while True:
+player = Player()
+
+rocket = Rocket()
+# rocket.set_speed(player.rect.x, player.rect.y, 0.75)
+
+all_sprites = pygame.sprite.Group()
+
+all_sprites.add(meeting_place, rocket, player)
+
+inGame = True
+while inGame:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:  # закрытие окна
             raise SystemExit
@@ -103,9 +177,28 @@ while True:
         ma_angle -= 0.01
         pygame.display.update()
     elif keys[pygame.K_5]:
-
         pusk = 1
         print("key 5 pressed, pusk = ", pusk)
+
+    #   if meeting_place.get_distance((screen_size[0] / 2), (screen_size[1] / 2)) <= 10:
+    #       print('STOP')
+    #   else:
+
+    # print(rocket.rect.move())
+    rocket.set_speed(player.x, player.y, 0)
+    if pusk == 1:
+        rocket.image.set_alpha(255)
+        rocket.set_speed(player.x, player.y, 2)
+        rocket.go()
+
+    player.set_speed((WIDTH / 2), HEIGHT, 0.5)
+    player.go()
+
+    meeting_place.x = ((player.x + rocket.x) / 2) - 10
+    meeting_place.y = ((player.y + rocket.y) / 2) - 10
+
+    # meeting_place.set_speed((player.x + rocket.x) / 2, (player.y + rocket.y) / 2, 0.5)
+    meeting_place.go()
 
     all_sprites.update()
 
@@ -142,9 +235,12 @@ while True:
                      (screen_center[0] + x_pos_left, screen_center[1] + y_pos_left), 2)  # left line
     pygame.draw.line(screen, (LINES_COL), (screen_center[0], screen_center[1]),
                      (screen_center[0] + x_pos_right, screen_center[1] + y_pos_right), 2)  # right line
-    # pygame.draw.line(screen, (255, 0, 0), (screen_center[0], screen_center[1]), (screen_center[0]+x_pos_right, screen_center[1]+y_pos_right), 2)                                    #compas
-    # pygame.display.update()
+    # pygame.draw.line(screen, (255, 0, 0), (screen_center[0], screen_center[1]), (screen_center[0]+x_pos_right,
+    # screen_center[1]+y_pos_right), 2)
+    # #compas pygame.display.update()
 
     all_sprites.draw(screen)
     # После отрисовки всего, переворачиваем экран
+
     pygame.display.flip()
+pygame.quit()
