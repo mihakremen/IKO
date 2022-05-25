@@ -20,7 +20,7 @@ angle_prev = 1                    # синхронизация угла сект
 width_prev = 1                    # синхронизация ширины сектора
 marker_prev = 1                   # синхронизация маркера
 north_angle = math.pi+2*math.pi/3 # положение отметки север
-FPS=360                            # частота обновления экрана
+FPS=200                            # частота обновления экрана
 
 Rotary_counter = 0
 Current_A1 = 1
@@ -84,12 +84,12 @@ def rotation_decode_1(A1_or_B1):
 		if A1_or_B1 == Enc_B1:				# Последней была замкнута нога Б?
 			angle += 0.03				# меняем угол поворота в большшую сторону
 			angle_send = int(angle*100)		# подготовка переменной для отправки
-			ser.write("a %d \n"%(angle_send))	# отправка переменной значения угла
+#			ser.write(("a %d \n"%(angle_send)).encode())	# отправка переменной значения угла
 #     	      	        print "angle's change -> ", angle_send
 		else:					# Последней была замкнута нога А?
 			angle -= 0.03
 			angle_send = int(angle*100)
-			ser.write("a %d \n"%(angle_send))
+#			ser.write(("a %d \n"%(angle_send)).encode)
 #                        print "angle's change -> ", angle_send
 		LockRotary.release()
 	return
@@ -169,7 +169,7 @@ ser = serial.Serial(
 #######################################################
 
 while True:
-	sleep(0.06)
+#	sleep(0.06)
 	clock.tick(FPS)
 	LockRotary.acquire()                                    # get lock for rotary swit$
 	NewCounter = Rotary_counter                     # get counter value
@@ -177,9 +177,9 @@ while True:
 	LockRotary.release()
 	if (NewCounter !=0):
 		marker = marker + NewCounter
-		marker_send = int(marker*100)
-		ser.write("m %d \n"%(marker_send))
-	print ("Direction  ", NewCounter, "marker pos ", marker_send)                   # which input gave l$
+		marker_send = ("m %d /n"%(int(marker*100)))
+		ser.write ((marker_send).encode('utf-8'))
+#		print ("Direction  ", NewCounter, "marker pos ", marker_send)                   # which input gave l$
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:       #закрытие окна
