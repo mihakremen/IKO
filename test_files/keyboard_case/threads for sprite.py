@@ -1,5 +1,6 @@
 from threading import Thread
 
+import constants
 import pygame
 import math
 import random
@@ -15,30 +16,53 @@ width = 105 * math.pi / 360
 
 WIDTH = screen_size[0]
 HEIGHT = screen_size[1]
-# real_space_width = input_V / 100 * 400
-offset_Player = 0
-offset_Meeting = 0
-offset_Rocket = 0
+
 pusk = 0
 
+
+
+
+
 # COMPAS
-co_width = 14
+co_width = 14  #ширина линии
 line_begin = (screen_center[0], 0)
-line_end = (screen_center[0], screen_radius * 0.15)
+line_end = (screen_center[0], screen_radius* 0.15)
 
 BACK_COL = (0, 138, 41)
 LINES_COL = (255, 255, 255)
 
-FPS = 10
+FPS = 100
+
+game_folder = os.path.dirname(__file__)
+img_folder = os.path.join(game_folder, 'img')
+player_img = pygame.image.load(os.path.join(img_folder, 'aim_1_romb.png'))
+meeting_place_img = pygame.image.load(os.path.join(img_folder, 'meeting_place.png'))
+rocket_img = pygame.image.load(os.path.join(img_folder, 'rocket.png'))
+
+####################################
+####### реальные координты #########
+####################################
+
+real_radius = 100000 # реальный радиус обнаружения
+aim_real_distance = 75000 # реальная дальность цели
+aim_real_speed = 500 # реальная скорость цели
+aim_azimut = 10 # азимут цели
+
+aim_distance = (aim_real_distance / real_radius) * screen_radius
+aim_x = screen_center[0] + aim_distance * math.cos(aim_azimut)
+aim_y = screen_center[1] + aim_distance * math.sin(aim_azimut)
+aim_speed = aim_real_speed / real_radius * screen_radius
+
+rocket_speed = 1000 / real_radius * screen_radius
 
 
-class Rocket(pygame.sprite.Sprite):
-    def __init__(self):
+class Rocket (pygame.sprite.Sprite):
+    def __init__(self, aim_real_distance, aim_azimut):
         pygame.sprite.Sprite.__init__(self)
         self.image = rocket_img
         self.image = pygame.transform.scale(self.image, (round(WIDTH / 8), round(HEIGHT / 8)))
         self.rect = self.image.get_rect()
-        self.image.set_alpha(100)
+        self.image.set_alpha(0)
         self.rect.center = ((WIDTH / 2) - 20, (HEIGHT / 2) - 20)
         self.x = (self.rect.center[0])  # добавлено
         self.y = (self.rect.center[1])  # добавлено
@@ -64,13 +88,13 @@ class Rocket(pygame.sprite.Sprite):
         return math.sqrt(xs * xs + ys * ys)  # добавлено
 
 
-class Player(pygame.sprite.Sprite):
+class Aim(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = player_img
         self.image = pygame.transform.scale(self.image, (int(WIDTH / 8), int(HEIGHT / 8)))
-        self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH / 2, HEIGHT / 8)  # начальные координаты
+        self.rect = self.image.get_rect() #определяем
+        self.rect.center = (aim_x, aim_y)  # начальные координаты
         self.x = int(self.rect.center[0])  # добавлено
         self.y = int(self.rect.center[1])  # добавлено
         self.speedx = 0
@@ -132,23 +156,17 @@ pygame.init()
 screen = pygame.display.set_mode(screen_size)
 clock = pygame.time.Clock()
 
-game_folder = os.path.dirname(__file__)
-img_folder = os.path.join(game_folder, 'img')
-player_img = pygame.image.load(os.path.join(img_folder, 'aim_1_romb.png'))
-meeting_place_img = pygame.image.load(os.path.join(img_folder, 'meeting_place.png'))
-rocket_img = pygame.image.load(os.path.join(img_folder, 'rocket.png'))
-
 meeting_place = Meeting_place()
 # куда лететь, с какой скоростью
 
-player = Player()
+aim = Aim()
 
-rocket = Rocket()
+rocket = Rocket(aim_real_distance, aim_azimut)
 # rocket.set_speed(player.rect.x, player.rect.y, 0.75)
 
 all_sprites = pygame.sprite.Group()
 
-all_sprites.add(meeting_place, rocket, player)
+all_sprites.add(meeting_place, rocket, aim)
 
 inGame = True
 while inGame:
@@ -185,24 +203,29 @@ while inGame:
     #   else:
 
     # print(rocket.rect.move())
-    rocket.set_speed(player.x, player.y, 0)
+    rocket.set_speed(aim.x, aim.y, 0)
     if pusk == 1:
         rocket.image.set_alpha(255)
-        rocket.set_speed(player.x, player.y, 2)
+        rocket.set_speed(aim.x, aim.y, rocket_speed / 120)
         rocket.go()
 
-    player.set_speed((WIDTH / 2), HEIGHT, 0.5)
-    player.go()
+    aim.set_speed(screen_center[0] - 10, screen_center[1] - 10, aim_speed/120)
+    aim.go()
 
-    meeting_place.x = ((player.x + rocket.x) / 2) - 10
-    meeting_place.y = ((player.y + rocket.y) / 2) - 10
+    meeting_place.x = ((aim.x + rocket.x) / 2) - 10
+    meeting_place.y = ((aim.y + rocket.y) / 2) - 10
 
     # meeting_place.set_speed((player.x + rocket.x) / 2, (player.y + rocket.y) / 2, 0.5)
     meeting_place.go()
 
     all_sprites.update()
 
-    # расчет координат
+###############################################################
+#################### РАСЧЕТ КООРДИНАТ #########################
+###############################################################
+
+    #####    координаты сектора 105     ########
+
     x_pos_center = screen_radius * math.cos(angle)
     y_pos_center = screen_radius * math.sin(angle)
 
@@ -217,6 +240,10 @@ while inGame:
 
     # x_pos_compas = screen_radius*math.cos(co_angle)
     # y_pos_compas = screen_radius*math.sin(co_angle)
+
+
+
+
 
     # отрисовка геометрии
 
